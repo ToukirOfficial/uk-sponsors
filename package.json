@@ -1,9 +1,31 @@
 {
   "name": "uk-sponsors",
   "version": "0.1.0",
-  "description": "Search the UK Home Office register of licensed visa sponsors from the command line.",
+  "description": "Search the UK Home Office register of licensed visa sponsors from the command line: by name, city, visa route and industry.",
+  "keywords": [
+    "uk",
+    "visa",
+    "visa-sponsorship",
+    "sponsor",
+    "sponsor-licence",
+    "skilled-worker",
+    "home-office",
+    "companies-house",
+    "sic-codes",
+    "immigration",
+    "job-search",
+    "cli"
+  ],
   "license": "MIT",
-  "author": "Toukir Ahmed Rony",
+  "author": "Toukir Ahmed Rony (https://github.com/ToukirOfficial)",
+  "homepage": "https://github.com/ToukirOfficial/uk-sponsors#readme",
+  "bugs": {
+    "url": "https://github.com/ToukirOfficial/uk-sponsors/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ToukirOfficial/uk-sponsors.git"
+  },
   "type": "module",
   "bin": {
     "uk-sponsors": "dist/cli.js"
@@ -16,22 +38,12 @@
   "engines": {
     "node": ">=22.12"
   },
-  "keywords": [
-    "uk",
-    "visa",
-    "sponsor",
-    "skilled-worker",
-    "home-office",
-    "cli"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/toukirofficial/uk-sponsors.git"
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
-  "homepage": "https://github.com/toukirofficial/uk-sponsors#readme",
-  "bugs": "https://github.com/toukirofficial/uk-sponsors/issues",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",

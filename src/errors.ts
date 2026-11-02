@@ -22,6 +22,6 @@ export class SourceError extends Error {
   }
 }
 
-export const ISSUES_URL = "https://github.com/toukirofficial/uk-sponsors/issues";
+export const ISSUES_URL = "https://github.com/ToukirOfficial/uk-sponsors/issues";
 
 export const SOURCE_CHANGED_HINT = `This tool may need an update. Try "npm install -g uk-sponsors@latest", or report it at ${ISSUES_URL}`;

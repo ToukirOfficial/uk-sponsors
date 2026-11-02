@@ -67,7 +67,7 @@ Runtime: `commander`, `csv-parse`, `cli-table3` (approved). No new ones for 1.1:
 - [x] **10. enrich** — locate, stream-unzip, parse, match, save; `--sic`, `--industry`, `--include-inactive`; JSON/CSV/check/stats show Companies House data. Fake zip + local server tests.
 - [x] **11. Look** — borderless coloured tables sized to content; colour only on a TTY, `NO_COLOR`/`FORCE_COLOR`.
 - [x] **12. README + npm** — badges, vhs GIF (`docs/demo.tape`), common questions, data sources, disclaimer; package.json publish fields.
-- [ ] **13. Finish** — open PR, merge once checks pass.
+- [x] **13. Finish** — open PR, merge once checks pass.
 
 ## Risks / can't verify here
 

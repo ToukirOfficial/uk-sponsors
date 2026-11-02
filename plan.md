@@ -52,7 +52,7 @@ Runtime: `commander`, `csv-parse`, `cli-table3` (approved). Dev: TypeScript, Vit
 - [x] **3. Index + query** — grouping, atomic index write, filters, check matching, stats. Tests.
 - [x] **4. Output** — table, JSON, CSV (escaping + spreadsheet-formula guard), `--out`. Tests.
 - [x] **5. Update** — cache paths, Content API lookup, host check, streaming download with progress, atomic swap, stale reminder. Tests use a local fake server only.
-- [ ] **6. CLI wiring** — commands, help with examples, friendly errors, exit codes. End-to-end test against the fixture.
+- [x] **6. CLI wiring** — commands, help with examples, friendly errors, exit codes. End-to-end test against the fixture.
 - [ ] **7. Docs + release** — README (per PRD §5; GIF placeholder), `docs/decisions/` notes, publish workflow on `v*` tag with provenance using `NPM_TOKEN`.
 - [ ] **8. Finish** — open PR, merge once checks pass.
 

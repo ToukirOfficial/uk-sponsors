@@ -31,10 +31,18 @@ Anyone who needs a UK work visa can only be hired by a company on the Home Offic
 8. Clear, friendly errors: no cache yet ("run uk-sponsors update first"), no internet, GOV.UK page changed, CSV columns changed (detect and name the missing columns instead of crashing).
 9. `--help` on every command with examples. Works on macOS, Linux and Windows.
 
+## 3a. Features (version 1.1, requested 2 Nov 2026)
+
+1. `uk-sponsors enrich` (optional) — downloads Companies House's free "Basic Company Data" snapshot (no key), streams it, matches companies to sponsors by normalised name (same as `check`) plus town, and stores company number, status and SIC codes locally. Reports the match rate.
+2. `search --sic <codes>` and `--industry <preset>` (software, it-services, fintech, health-tech, legal-services). Only active companies by default (`--include-inactive` to widen).
+3. Colour and clean table output, respecting `NO_COLOR` and non-terminal output.
+4. Read the UK Expansion Worker "Provisional" rating (it showed as "Unknown").
+5. README: badges, a vhs-recorded GIF (tape committed), common questions, data sources (including Companies House under the OGL) and disclaimer. npm-ready package.json.
+
 ## 4. Non-functional
 
 - Search across the full register returns in under 1 second on a normal laptop after the first load (build a small local index on `update`).
-- No telemetry, no network calls except `update`.
+- No telemetry, no network calls except `update` and `enrich`.
 - Data source credited in the README and `--help`: Home Office, published on GOV.UK under the Open Government Licence v3.0.
 - Clear disclaimer: the register shows companies licensed to sponsor; it doesn't mean a company is hiring or will sponsor a particular role.
 

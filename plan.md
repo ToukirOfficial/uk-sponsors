@@ -4,12 +4,13 @@ Source of truth: `PRD.md`. Stack and rules: the project rules.
 
 ## Commands
 
-| Command          | What it does                                                                                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `update`         | Finds the CSV through the GOV.UK Content API, streams the download, checks columns, builds the index. Shows progress. Only command that uses the network. |
-| `search`         | Filters (AND): `--name`, `--city`, `--county`, `--route`, `--rating A\|B`, `--limit` (default 50).                                                        |
-| `check "<name>"` | Yes/no for one company, with routes, city, rating. Shows up to 5 close matches if no exact match.                                                         |
-| `stats`          | Register date, total companies and rows, top 10 cities, counts by route, by type (Worker / Temporary Worker) and by rating.                               |
+| Command          | What it does                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `update`         | Finds the CSV through the GOV.UK Content API, streams the download, checks columns, builds the index. Shows progress. Only command that uses the network.    |
+| `search`         | Filters (AND): `--name`, `--city`, `--county`, `--route`, `--rating A\|B\|provisional`, `--industry`, `--sic`, `--include-inactive`, `--limit` (default 50). |
+| `check "<name>"` | Yes/no for one company, with routes, city, rating. Shows up to 5 close matches if no exact match.                                                            |
+| `enrich`         | Optional. Streams Companies House's free Basic Company Data zip, matches sponsors by name + town, saves number, status, SIC codes. Reports match rate.       |
+| `stats`          | Register date, total companies and rows, top 10 cities, counts by route, by type (Worker / Temporary Worker) and by rating.                                  |
 
 Shared flags: `--json`, `--csv`, `--out <file>`. If the data is over 7 days old, every command prints a one-line reminder that names the register date. `--help` has examples plus the OGL v3.0 credit and disclaimer.
 
@@ -31,7 +32,11 @@ src/register/normalise.ts name matching key: case-insensitive; Ltd = Limited, & 
                          accents and repeated spaces
 src/register/store.ts    group rows into companies; write/read one index file (meta + companies)
 src/register/query.ts    filters, check matching, stats
-src/output/              table.ts, json.ts, csv.ts
+src/output/              table.ts, json.ts, csv.ts, style.ts (ANSI colour; off for pipes, NO_COLOR, --out)
+src/companies-house/     locate.ts (find BasicCompanyDataAsOneFile-*.zip on the download page; host check)
+                         unzip.ts (skip the zip header, inflate with node:zlib as it streams)
+                         parse.ts (column check, SIC codes), match.ts (name+town, name, former name)
+                         industries.ts (presets, --sic parsing), store.ts (companies-house.json)
 ```
 
 ## Data flow
@@ -43,7 +48,7 @@ Each route row keeps its own type and rating, so filters combine correctly. `Typ
 
 ## Dependencies
 
-Runtime: `commander`, `csv-parse`, `cli-table3` (approved). Dev: TypeScript, Vitest, ESLint (+ typescript-eslint), Prettier, `@types/node`. Build with `tsc`.
+Runtime: `commander`, `csv-parse`, `cli-table3` (approved). No new ones for 1.1: unzip uses `node:zlib`, colour is a few ANSI codes. Dev: TypeScript, Vitest, ESLint (+ typescript-eslint), Prettier, `@types/node`. Build with `tsc`.
 
 ## Phases
 
@@ -54,7 +59,15 @@ Runtime: `commander`, `csv-parse`, `cli-table3` (approved). Dev: TypeScript, Vit
 - [x] **5. Update** — cache paths, Content API lookup, host check, streaming download with progress, atomic swap, stale reminder. Tests use a local fake server only.
 - [x] **6. CLI wiring** — commands, help with examples, friendly errors, exit codes. End-to-end test against the fixture.
 - [x] **7. Docs + release** — README (per PRD §5; GIF placeholder), `docs/decisions/` notes, publish workflow on `v*` tag with provenance using `NPM_TOKEN`.
-- [ ] **8. Finish** — open PR, merge once checks pass.
+- [x] **8. Finish** — open PR, merge once checks pass.
+
+### Version 1.1
+
+- [x] **9. Provisional rating** — `Worker (UK Expansion Worker: Provisional )` read as `Provisional`; index format 2.
+- [x] **10. enrich** — locate, stream-unzip, parse, match, save; `--sic`, `--industry`, `--include-inactive`; JSON/CSV/check/stats show Companies House data. Fake zip + local server tests.
+- [x] **11. Look** — borderless coloured tables sized to content; colour only on a TTY, `NO_COLOR`/`FORCE_COLOR`.
+- [x] **12. README + npm** — badges, vhs GIF (`docs/demo.tape`), common questions, data sources, disclaimer; package.json publish fields.
+- [ ] **13. Finish** — open PR, merge once checks pass.
 
 ## Risks / can't verify here
 

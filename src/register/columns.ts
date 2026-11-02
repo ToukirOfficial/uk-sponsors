@@ -12,7 +12,7 @@ export const REQUIRED_COLUMNS = {
 export type ColumnKey = keyof typeof REQUIRED_COLUMNS;
 export type ColumnMap = Record<ColumnKey, number>;
 
-function headerKey(header: string): string {
+export function headerKey(header: string): string {
   return header
     .replace(/^\uFEFF/, "")
     .trim()
@@ -25,15 +25,27 @@ function headerKey(header: string): string {
  * Extra columns are fine; missing ones stop the load with a message naming them.
  */
 export function mapColumns(header: readonly string[]): ColumnMap {
+  return findColumns(header, REQUIRED_COLUMNS, "The sponsor register");
+}
+
+/**
+ * Finds each required column by name (ignoring case, spaces and a BOM).
+ * Throws a SourceError naming the missing ones.
+ */
+export function findColumns<K extends string>(
+  header: readonly string[],
+  required: Readonly<Record<K, string>>,
+  sourceName: string,
+): Record<K, number> {
   const positions = new Map<string, number>();
   header.forEach((h, i) => {
     const key = headerKey(h);
     if (!positions.has(key)) positions.set(key, i);
   });
 
-  const map: Partial<ColumnMap> = {};
+  const map: Partial<Record<K, number>> = {};
   const missing: string[] = [];
-  for (const [key, label] of Object.entries(REQUIRED_COLUMNS) as [ColumnKey, string][]) {
+  for (const [key, label] of Object.entries(required) as [K, string][]) {
     const pos = positions.get(headerKey(label));
     if (pos === undefined) missing.push(label);
     else map[key] = pos;
@@ -42,9 +54,9 @@ export function mapColumns(header: readonly string[]): ColumnMap {
   if (missing.length > 0) {
     const found = header.map((h) => `"${h.trim()}"`).join(", ") || "(none)";
     throw new SourceError(
-      `The sponsor register's columns have changed. Missing: ${missing.map((m) => `"${m}"`).join(", ")}. Found: ${found}.`,
+      `${sourceName}'s columns have changed. Missing: ${missing.map((m) => `"${m}"`).join(", ")}. Found: ${found}.`,
       SOURCE_CHANGED_HINT,
     );
   }
-  return map as ColumnMap;
+  return map as Record<K, number>;
 }

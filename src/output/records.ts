@@ -1,3 +1,4 @@
+import type { CompanyInfo } from "../companies-house/match.js";
 import type { Company, RouteEntry } from "../register/store.js";
 
 /** The public shape of a company in JSON and CSV output. */
@@ -8,6 +9,8 @@ export interface CompanyRecord {
   ratings: string[];
   types: string[];
   routes: RouteEntry[];
+  /** Only after "uk-sponsors enrich": the matched company, or null if none was found. */
+  companiesHouse?: CompanyInfo | null;
 }
 
 function unique(values: (string | null)[]): string[] {
@@ -22,6 +25,7 @@ export function toRecord(company: Company): CompanyRecord {
     ratings: unique(company.routes.map((r) => r.rating)).sort(),
     types: unique(company.routes.map((r) => r.type)),
     routes: company.routes.map((r) => ({ route: r.route, type: r.type, rating: r.rating })),
+    ...(company.companiesHouse !== undefined ? { companiesHouse: company.companiesHouse } : {}),
   };
 }
 

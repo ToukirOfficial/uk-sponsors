@@ -3,7 +3,11 @@ import { parse } from "csv-parse";
 import { SOURCE_CHANGED_HINT, SourceError } from "../errors.js";
 import { mapColumns } from "./columns.js";
 
-export type Rating = "A" | "B";
+/**
+ * A and B are the normal ratings. "Provisional" is given to new UK Expansion
+ * Worker sponsors: "Worker (UK Expansion Worker: Provisional )" on the register.
+ */
+export type Rating = "A" | "B" | "Provisional";
 export type SponsorType = "Worker" | "Temporary Worker";
 
 export interface RegisterRow {
@@ -23,7 +27,11 @@ export function cleanField(value: string | undefined): string {
   return (value ?? "").replace(CONTROL_CHARS, " ").replace(/\s+/g, " ").trim();
 }
 
-/** "Temporary Worker (A rating)" → { type: "Temporary Worker", rating: "A" }. */
+/**
+ * "Temporary Worker (A rating)" → { type: "Temporary Worker", rating: "A" }.
+ * Also reads "Worker (A (SME+))", "Worker (A (Premium))" and
+ * "Worker (UK Expansion Worker: Provisional )".
+ */
 export function parseTypeRating(value: string): {
   type: SponsorType | null;
   rating: Rating | null;
@@ -36,7 +44,12 @@ export function parseTypeRating(value: string): {
       : null;
   const match = /\(\s*([AB])\b/i.exec(text);
   const letter = match?.[1]?.toUpperCase();
-  const rating: Rating | null = letter === "A" || letter === "B" ? letter : null;
+  const rating: Rating | null =
+    letter === "A" || letter === "B"
+      ? letter
+      : /\bprovisional\b/i.test(text)
+        ? "Provisional"
+        : null;
   return { type, rating };
 }
 

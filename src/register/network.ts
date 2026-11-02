@@ -16,6 +16,6 @@ export function networkError(err: unknown, what: string): SourceError {
 export function httpError(status: number, what: string): SourceError {
   return new SourceError(
     `${what} answered with HTTP ${status}.`,
-    status >= 500 ? "GOV.UK may be having problems. Try again in a few minutes." : OFFLINE_HINT,
+    status >= 500 ? "The server may be having problems. Try again in a few minutes." : OFFLINE_HINT,
   );
 }

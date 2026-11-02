@@ -9,7 +9,8 @@ import {
   readIndexFile,
   writeIndexFile,
 } from "../src/register/store.js";
-import { FIXTURE_SOURCE, fixtureRegister, fixtureRows } from "./helpers.js";
+import { registerStats } from "../src/register/query.js";
+import { collect, csv, FIXTURE_SOURCE, fixtureRegister, fixtureRows } from "./helpers.js";
 
 describe("buildIndex", () => {
   test("groups several routes into one company", async () => {
@@ -95,4 +96,21 @@ describe("index file", () => {
     await installIndexFile(temp, live);
     expect((await readFile(live, "utf8")).startsWith('{"meta"')).toBe(true);
   });
+});
+
+test("keeps the Provisional rating through the index file", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "uk-sponsors-prov-"));
+  try {
+    const rows = await collect(
+      csv(
+        "Organisation Name,Town/City,County,Type & Rating,Route\nNewco UK Ltd,London,,Worker (UK Expansion Worker: Provisional ),Global Business Mobility: UK Expansion Worker\n",
+      ),
+    );
+    await writeIndexFile(join(dir, "index.json"), await buildIndex(rows, FIXTURE_SOURCE));
+    const loaded = await readIndexFile(join(dir, "index.json"));
+    expect(loaded.companies[0]?.routes[0]?.rating).toBe("Provisional");
+    expect(registerStats(loaded).ratings).toEqual([{ label: "Provisional", count: 1 }]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

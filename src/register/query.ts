@@ -1,3 +1,4 @@
+import { sicMatches } from "../companies-house/industries.js";
 import { containsWords, normaliseName, normaliseText } from "./normalise.js";
 import type { Rating } from "./parse.js";
 import type { IndexedCompany, LoadedRegister, RouteEntry } from "./store.js";
@@ -8,6 +9,10 @@ export interface SearchFilters {
   county?: string | undefined;
   route?: string | undefined;
   rating?: Rating | undefined;
+  /** SIC code patterns (5 digits exact, fewer = prefix). Needs enrich data. */
+  sic?: readonly string[] | undefined;
+  /** With sic: also include companies that aren't "Active" at Companies House. */
+  includeInactive?: boolean | undefined;
 }
 
 // Route names repeat across thousands of companies, so normalise each once.
@@ -43,13 +48,22 @@ export function searchCompanies(
   const routeKey = filters.route ? normaliseText(filters.route) : "";
   const rating = filters.rating;
   const checkRoutes = routeKey !== "" || rating !== undefined;
+  const sic = filters.sic && filters.sic.length > 0 ? filters.sic : undefined;
+  const sicOk = (c: IndexedCompany): boolean => {
+    if (!sic) return true;
+    const ch = c.companiesHouse;
+    if (!ch) return false;
+    if (!filters.includeInactive && ch.status !== "Active") return false;
+    return sicMatches(ch.sicCodes, sic);
+  };
 
   return register.companies.filter(
     (c) =>
       (nameKey === "" || c.nameKey.includes(nameKey)) &&
       (cityKey === "" || containsWords(c.cityKey, cityKey)) &&
       (countyKey === "" || containsWords(c.countyKey, countyKey)) &&
-      (!checkRoutes || c.routes.some((r) => routeMatches(r, routeKey, rating))),
+      (!checkRoutes || c.routes.some((r) => routeMatches(r, routeKey, rating))) &&
+      sicOk(c),
   );
 }
 

@@ -1,9 +1,10 @@
 import { readFile, rename, writeFile } from "node:fs/promises";
 import { UserError } from "../errors.js";
 import { normaliseName, normaliseText } from "./normalise.js";
+import type { CompanyInfo } from "../companies-house/match.js";
 import type { Rating, RegisterRow, SponsorType } from "./parse.js";
 
-export const FORMAT_VERSION = 1;
+export const FORMAT_VERSION = 2;
 
 export interface RouteEntry {
   route: string;
@@ -16,6 +17,8 @@ export interface Company {
   city: string;
   county: string;
   routes: RouteEntry[];
+  /** Set after "uk-sponsors enrich" if the company was matched; null if it wasn't. */
+  companiesHouse?: CompanyInfo | null;
 }
 
 export interface RegisterMeta {
@@ -120,7 +123,7 @@ function isStoredRoute(v: unknown): v is StoredRoute {
     Array.isArray(v) &&
     typeof v[0] === "string" &&
     (v[1] === "W" || v[1] === "T" || v[1] === null) &&
-    (v[2] === "A" || v[2] === "B" || v[2] === null)
+    (v[2] === "A" || v[2] === "B" || v[2] === "Provisional" || v[2] === null)
   );
 }
 

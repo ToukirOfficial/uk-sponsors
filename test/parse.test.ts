@@ -116,6 +116,9 @@ describe("parseTypeRating", () => {
     ["Worker (A (Premium))", "Worker", "A"],
     ["Temporary Worker (A rating)", "Temporary Worker", "A"],
     ["Temporary Worker (B rating)", "Temporary Worker", "B"],
+    // 97 sponsors on the 2 Nov 2026 register; these used to show as "Unknown".
+    ["Worker (UK Expansion Worker: Provisional )", "Worker", "Provisional"],
+    ["Temporary Worker (A (SME+))", "Temporary Worker", "A"],
     ["Something new", null, null],
   ])("%s", (input, type, rating) => {
     expect(parseTypeRating(input)).toEqual({ type, rating });

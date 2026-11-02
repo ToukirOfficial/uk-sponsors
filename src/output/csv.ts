@@ -31,6 +31,18 @@ export function companyCsvRow(company: Company): string[] {
   ];
 }
 
-export function companiesCsv(companies: Company[]): string {
-  return csvTable(COMPANY_CSV_HEADER, companies.map(companyCsvRow));
+export const COMPANIES_HOUSE_CSV_HEADER = ["company_number", "company_status", "sic_codes"];
+
+/** CSV of companies. With companiesHouse, adds number, status and SIC codes (blank if unmatched). */
+export function companiesCsv(companies: Company[], companiesHouse = false): string {
+  if (!companiesHouse) return csvTable(COMPANY_CSV_HEADER, companies.map(companyCsvRow));
+  return csvTable(
+    [...COMPANY_CSV_HEADER, ...COMPANIES_HOUSE_CSV_HEADER],
+    companies.map((c) => [
+      ...companyCsvRow(c),
+      c.companiesHouse?.number ?? "",
+      c.companiesHouse?.status ?? "",
+      (c.companiesHouse?.sicCodes ?? []).join("; "),
+    ]),
+  );
 }

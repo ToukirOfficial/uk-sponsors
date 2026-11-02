@@ -4,12 +4,12 @@ Source of truth: `PRD.md`. Stack and rules: the project rules.
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `update` | Finds the CSV through the GOV.UK Content API, streams the download, checks columns, builds the index. Shows progress. Only command that uses the network. |
-| `search` | Filters (AND): `--name`, `--city`, `--county`, `--route`, `--rating A\|B`, `--limit` (default 50). |
-| `check "<name>"` | Yes/no for one company, with routes, city, rating. Shows up to 5 close matches if no exact match. |
-| `stats` | Register date, total companies and rows, top 10 cities, counts by route, by type (Worker / Temporary Worker) and by rating. |
+| Command          | What it does                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `update`         | Finds the CSV through the GOV.UK Content API, streams the download, checks columns, builds the index. Shows progress. Only command that uses the network. |
+| `search`         | Filters (AND): `--name`, `--city`, `--county`, `--route`, `--rating A\|B`, `--limit` (default 50).                                                        |
+| `check "<name>"` | Yes/no for one company, with routes, city, rating. Shows up to 5 close matches if no exact match.                                                         |
+| `stats`          | Register date, total companies and rows, top 10 cities, counts by route, by type (Worker / Temporary Worker) and by rating.                               |
 
 Shared flags: `--json`, `--csv`, `--out <file>`. If the data is over 7 days old, every command prints a one-line reminder that names the register date. `--help` has examples plus the OGL v3.0 credit and disclaimer.
 
@@ -47,7 +47,7 @@ Runtime: `commander`, `csv-parse`, `cli-table3` (approved). Dev: TypeScript, Vit
 
 ## Phases
 
-- [ ] **1. Scaffold** — package.json (bin, ESM, engines ≥22), tsconfig strict, ESLint, Prettier, Vitest, CI workflow for checks.
+- [x] **1. Scaffold** — package.json (bin, ESM, engines ≥22), tsconfig strict, ESLint, Prettier, Vitest, CI workflow for checks.
 - [ ] **2. Parse + columns + normalise** — fake fixture CSV (BOM, CRLF, accents, quoted commas, `&`, Ltd/Limited, Temporary Worker routes, multi-route companies), parser, column check, name normalisation. Tests.
 - [ ] **3. Index + query** — grouping, atomic index write, filters, check matching, stats. Tests.
 - [ ] **4. Output** — table, JSON, CSV (escaping + spreadsheet-formula guard), `--out`. Tests.

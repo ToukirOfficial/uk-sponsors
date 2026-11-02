@@ -90,7 +90,12 @@ Example:
         "--route <text>",
         'visa route, e.g. "Skilled Worker", "Creative Worker" or "Temporary Worker"',
       )
-      .addOption(new Option("--rating <A|B>", "sponsor rating: A or B"))
+      .addOption(
+        new Option(
+          "--rating <A|B|provisional>",
+          "sponsor rating: A, B, or provisional (new UK Expansion Worker sponsors)",
+        ),
+      )
       .option("--limit <n>", "most results to show", "50"),
   )
     .addHelpText(

@@ -22,7 +22,10 @@ export function parseRating(value: string | undefined): Rating | undefined {
   if (value === undefined) return undefined;
   const upper = value.trim().toUpperCase();
   if (upper === "A" || upper === "B") return upper;
-  throw new UserError(`"${value}" isn't a rating. Use --rating A or --rating B.`);
+  if (upper === "P" || upper === "PROVISIONAL") return "Provisional";
+  throw new UserError(
+    `"${value}" isn't a rating. Use --rating A, --rating B or --rating provisional.`,
+  );
 }
 
 export function parseLimit(value: string | undefined): number {

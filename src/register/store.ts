@@ -3,7 +3,7 @@ import { UserError } from "../errors.js";
 import { normaliseName, normaliseText } from "./normalise.js";
 import type { Rating, RegisterRow, SponsorType } from "./parse.js";
 
-export const FORMAT_VERSION = 1;
+export const FORMAT_VERSION = 2;
 
 export interface RouteEntry {
   route: string;
@@ -120,7 +120,7 @@ function isStoredRoute(v: unknown): v is StoredRoute {
     Array.isArray(v) &&
     typeof v[0] === "string" &&
     (v[1] === "W" || v[1] === "T" || v[1] === null) &&
-    (v[2] === "A" || v[2] === "B" || v[2] === null)
+    (v[2] === "A" || v[2] === "B" || v[2] === "Provisional" || v[2] === null)
   );
 }
 

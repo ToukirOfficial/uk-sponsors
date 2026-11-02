@@ -1,0 +1,55 @@
+{
+  "name": "uk-sponsors",
+  "version": "0.1.0",
+  "description": "Search the UK Home Office register of licensed visa sponsors from the command line.",
+  "license": "MIT",
+  "author": "Toukir Ahmed Rony",
+  "type": "module",
+  "bin": {
+    "uk-sponsors": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "keywords": [
+    "uk",
+    "visa",
+    "sponsor",
+    "skilled-worker",
+    "home-office",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toukirofficial/uk-sponsors.git"
+  },
+  "homepage": "https://github.com/toukirofficial/uk-sponsors#readme",
+  "bugs": "https://github.com/toukirofficial/uk-sponsors/issues",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "cli-table3": "^0.6.5",
+    "commander": "^15.0.0",
+    "csv-parse": "^7.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  }
+}

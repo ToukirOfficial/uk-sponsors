@@ -1,0 +1,19 @@
+﻿Organisation Name,Town/City,County,Type & Rating,Route
+Acme Software Ltd,Leeds,West Yorkshire,Worker (A rating),Skilled Worker
+Acme Software Ltd,Leeds,West Yorkshire,Worker (A rating),Global Business Mobility: Senior or Specialist Worker
+Acme Software Ltd,Leeds,West Yorkshire,Worker (A rating),Skilled Worker
+Acme Software Ltd,Bristol,,Worker (A rating),Skilled Worker
+"Smith, Jones & Partners LLP",Manchester,Greater Manchester,Worker (A rating),Skilled Worker
+Café Société Limited,London,,Worker (B rating),Skilled Worker
+Brighton Arts Trust,Brighton,East Sussex,Temporary Worker (A rating),Creative Worker
+Brighton Arts Trust,Brighton,East Sussex,Temporary Worker (A rating),Charity Worker
+Northern Care & Health PLC,Leeds,,Worker (A (SME+)),Skilled Worker
+Zürich Data Ltd.,Manchester,Greater Manchester,Worker (A (Premium)),Scale-up
+"The ""Quoted"" Company Ltd",Glasgow,Lanarkshire,Worker (A rating),Skilled Worker
+"  Green  Fields   Farm Ltd ",Hereford,Herefordshire,Temporary Worker (A rating),Seasonal Worker
+O’Brien & Sons Limited,Leeds,West Yorkshire,Worker (B rating),Skilled Worker
+Leeds Ballet Company,"LEEDS ",West Yorkshire,Temporary Worker (A rating),Creative Worker
+København Design ApS,London,,Worker (A rating),Global Business Mobility: UK Expansion Worker
+Leeds Ballet Company,LEEDS,West Yorkshire,Worker (A rating),Skilled Worker
+=cmd|calc!A1,London,,Worker (A rating),Skilled Worker
+,,,,

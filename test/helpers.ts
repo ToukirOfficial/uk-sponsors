@@ -1,3 +1,6 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createReadStream } from "node:fs";
 import {
   buildIndex,
@@ -26,9 +29,6 @@ export function csv(text: string): Readable {
 }
 
 export async function fixtureRegister(): Promise<LoadedRegister> {
-  const { mkdtemp, rm } = await import("node:fs/promises");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
   const dir = await mkdtemp(join(tmpdir(), "uk-sponsors-test-"));
   try {
     const index = await buildIndex(await fixtureRows(), FIXTURE_SOURCE);

@@ -49,7 +49,7 @@ Runtime: `commander`, `csv-parse`, `cli-table3` (approved). Dev: TypeScript, Vit
 
 - [x] **1. Scaffold** — package.json (bin, ESM, engines ≥22), tsconfig strict, ESLint, Prettier, Vitest, CI workflow for checks.
 - [x] **2. Parse + columns + normalise** — fake fixture CSV (BOM, CRLF, accents, quoted commas, `&`, Ltd/Limited, Temporary Worker routes, multi-route companies), parser, column check, name normalisation. Tests.
-- [ ] **3. Index + query** — grouping, atomic index write, filters, check matching, stats. Tests.
+- [x] **3. Index + query** — grouping, atomic index write, filters, check matching, stats. Tests.
 - [ ] **4. Output** — table, JSON, CSV (escaping + spreadsheet-formula guard), `--out`. Tests.
 - [ ] **5. Update** — cache paths, Content API lookup, host check, streaming download with progress, atomic swap, stale reminder. Tests use a local fake server only.
 - [ ] **6. CLI wiring** — commands, help with examples, friendly errors, exit codes. End-to-end test against the fixture.

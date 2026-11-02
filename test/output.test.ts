@@ -36,7 +36,7 @@ describe("csv", () => {
 
   test("company CSV reads back to the same values", () => {
     const text = companiesCsv(register.companies);
-    const rows = parse(text, { columns: true }) as Record<string, string>[];
+    const rows: Record<string, string>[] = parse(text, { columns: true });
     expect(rows).toHaveLength(13);
     expect(rows.find((r) => r.name === "Smith, Jones & Partners LLP")).toEqual({
       name: "Smith, Jones & Partners LLP",

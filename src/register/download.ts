@@ -14,15 +14,25 @@ export interface DownloadOptions {
   /** Give up if no data arrives for this long. */
   idleTimeoutMs?: number;
   maxBytes?: number;
+  /** Who we're downloading from, for error messages. */
+  serverName?: string;
 }
 
-/** Streams a file to disk without holding it in memory. Returns the byte count. */
-export async function downloadFile(
-  url: string,
-  dest: string,
-  options: DownloadOptions,
-): Promise<number> {
+export interface OpenDownload {
+  /** The response body. Fails if the transfer is cut short or grows too large. */
+  body: Readable;
+  total: number | null;
+  /** Stops the idle timer. Call when finished, whether it worked or not. */
+  close: () => void;
+}
+
+/**
+ * Starts a download and returns the body as a stream, so callers can parse it
+ * as it arrives without holding the file in memory.
+ */
+export async function openDownload(url: string, options: DownloadOptions): Promise<OpenDownload> {
   checkDownloadUrl(url, options.allowedOrigins);
+  const server = options.serverName ?? "the GOV.UK file server";
   const idleMs = options.idleTimeoutMs ?? 60_000;
   const maxBytes = options.maxBytes ?? 500 * 1024 * 1024;
   const controller = new AbortController();
@@ -35,17 +45,22 @@ export async function downloadFile(
       controller.abort();
     }, idleMs);
   };
+  const close = () => {
+    clearTimeout(timer);
+  };
 
   try {
     let response: Response;
     try {
       response = await fetch(url, { signal: controller.signal });
     } catch (err) {
-      throw networkError(err, "the GOV.UK file server");
+      throw networkError(err, server);
     }
-    // Redirects must not leave GOV.UK's file host either.
+    // Redirects must not leave the allowed host either.
     if (response.url) checkDownloadUrl(response.url, options.allowedOrigins);
-    if (!response.ok || !response.body) throw httpError(response.status, "The GOV.UK file server");
+    if (!response.ok || !response.body) {
+      throw httpError(response.status, server.charAt(0).toUpperCase() + server.slice(1));
+    }
 
     const lengthHeader = Number(response.headers.get("content-length"));
     const total = Number.isFinite(lengthHeader) && lengthHeader > 0 ? lengthHeader : null;
@@ -57,39 +72,70 @@ export async function downloadFile(
         resetTimer();
         if (received > maxBytes) {
           done(
-            new SourceError(
-              "The register file is far larger than expected, so the download was stopped.",
-            ),
+            new SourceError("The file is far larger than expected, so the download was stopped."),
           );
           return;
         }
         options.onProgress?.(received, total);
         done(null, chunk);
       },
+      flush(done) {
+        if (total !== null && received !== total) {
+          done(
+            new SourceError(
+              `The download was cut short (${received} of ${total} bytes).`,
+              "Check your internet connection and try again.",
+            ),
+          );
+          return;
+        }
+        done();
+      },
     });
 
-    try {
-      await pipeline(
-        Readable.fromWeb(response.body as WebReadableStream<Uint8Array>),
-        counter,
-        createWriteStream(dest),
+    const source = Readable.fromWeb(response.body as WebReadableStream<Uint8Array>);
+    source.on("error", () => {
+      counter.destroy(
+        new SourceError(
+          "The download was interrupted.",
+          "Check your internet connection and try again.",
+        ),
       );
-    } catch (err) {
-      if (err instanceof SourceError) throw err;
-      throw new SourceError(
-        "The download was interrupted.",
-        "Check your internet connection and try again.",
-      );
-    }
-
-    if (total !== null && received !== total) {
-      throw new SourceError(
-        `The download was cut short (${received} of ${total} bytes).`,
-        "Check your internet connection and try again.",
-      );
-    }
-    return received;
-  } finally {
-    clearTimeout(timer);
+    });
+    return { body: source.pipe(counter), total, close };
+  } catch (err) {
+    close();
+    throw err;
   }
+}
+
+/** Streams a file to disk without holding it in memory. Returns the byte count. */
+export async function downloadFile(
+  url: string,
+  dest: string,
+  options: DownloadOptions,
+): Promise<number> {
+  const download = await openDownload(url, options);
+  let received = 0;
+  try {
+    await pipeline(
+      download.body,
+      new Transform({
+        transform(chunk: Buffer, _enc, done) {
+          received += chunk.length;
+          done(null, chunk);
+        },
+      }),
+      createWriteStream(dest),
+    );
+  } catch (err) {
+    if (err instanceof SourceError) throw err;
+    throw new SourceError(
+      "The download was interrupted.",
+      "Check your internet connection and try again.",
+    );
+  } finally {
+    download.close();
+  }
+  return received;
 }

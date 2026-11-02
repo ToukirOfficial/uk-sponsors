@@ -24,8 +24,7 @@ describe("cacheDir", () => {
       "win32",
       "C:\\Users\\rony",
     );
-    expect(dir).toContain("uk-sponsors");
-    expect(dir).toContain("Cache");
+    expect(dir).toBe("C:\\Users\\rony\\AppData\\Local\\uk-sponsors\\Cache");
   });
 
   test("UK_SPONSORS_CACHE_DIR overrides", () => {

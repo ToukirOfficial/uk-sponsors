@@ -1,5 +1,5 @@
 import { homedir } from "node:os";
-import { isAbsolute, join } from "node:path";
+import { posix, win32 } from "node:path";
 
 /**
  * The OS user cache folder for uk-sponsors:
@@ -11,6 +11,8 @@ export function cacheDir(
   platform: NodeJS.Platform = process.platform,
   home: string = homedir(),
 ): string {
+  // Use the path rules of the target platform, not the machine running this.
+  const { isAbsolute, join } = platform === "win32" ? win32 : posix;
   const override = env.UK_SPONSORS_CACHE_DIR;
   if (override) return override;
   if (platform === "win32") {
@@ -22,5 +24,5 @@ export function cacheDir(
 }
 
 export function indexPath(dir: string): string {
-  return join(dir, "index.json");
+  return (process.platform === "win32" ? win32 : posix).join(dir, "index.json");
 }

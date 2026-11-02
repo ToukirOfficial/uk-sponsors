@@ -12,15 +12,19 @@ export function cacheDir(
   home: string = homedir(),
 ): string {
   // Use the path rules of the target platform, not the machine running this.
-  const { isAbsolute, join } = platform === "win32" ? win32 : posix;
+  const path = platform === "win32" ? win32 : posix;
   const override = env.UK_SPONSORS_CACHE_DIR;
   if (override) return override;
   if (platform === "win32") {
-    return join(env.LOCALAPPDATA ?? join(home, "AppData", "Local"), "uk-sponsors", "Cache");
+    return path.join(
+      env.LOCALAPPDATA ?? path.join(home, "AppData", "Local"),
+      "uk-sponsors",
+      "Cache",
+    );
   }
-  if (platform === "darwin") return join(home, "Library", "Caches", "uk-sponsors");
+  if (platform === "darwin") return path.join(home, "Library", "Caches", "uk-sponsors");
   const xdg = env.XDG_CACHE_HOME;
-  return join(xdg && isAbsolute(xdg) ? xdg : join(home, ".cache"), "uk-sponsors");
+  return path.join(xdg && path.isAbsolute(xdg) ? xdg : path.join(home, ".cache"), "uk-sponsors");
 }
 
 export function indexPath(dir: string): string {

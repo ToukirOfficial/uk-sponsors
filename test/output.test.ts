@@ -8,7 +8,7 @@ import { companiesCsv, csvCell } from "../src/output/csv.js";
 import { emit, resolveFormat } from "../src/output/format.js";
 import { toJson } from "../src/output/json.js";
 import { toRecord } from "../src/output/records.js";
-import { companiesTable, countTable } from "../src/output/table.js";
+import { companiesTable, countTable, fitColumns } from "../src/output/table.js";
 import { searchCompanies } from "../src/register/query.js";
 import type { LoadedRegister } from "../src/register/store.js";
 import { fixtureRegister } from "./helpers.js";
@@ -87,6 +87,21 @@ describe("table", () => {
   test("fits a given terminal width", () => {
     const text = companiesTable(register.companies, 100);
     for (const line of text.trimEnd().split("\n")) expect(line.length).toBeLessThanOrEqual(100);
+  });
+
+  test("columns fit their content, and shrink to fit a narrow terminal", () => {
+    expect(fitColumns([10, 5, 6, 6, 14], 120, [0, 4])).toEqual([10, 5, 6, 6, 14]);
+    const narrow = fitColumns([40, 9, 20, 6, 60], 80, [0, 4]);
+    expect(narrow.reduce((a, b) => a + b, 0) + 2 * 4).toBeLessThanOrEqual(79);
+    expect(narrow[2]).toBe(16);
+  });
+
+  test("colour only when asked", () => {
+    const plain = companiesTable(register.companies);
+    const coloured = companiesTable(register.companies, { color: true });
+    expect(plain).not.toContain("\u001b[");
+    expect(coloured).toContain("\u001b[1mCompany\u001b[22m");
+    expect(coloured).toContain("\u001b[32mA\u001b[39m");
   });
 
   test("count table formats numbers", () => {

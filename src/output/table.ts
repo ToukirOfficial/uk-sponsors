@@ -47,18 +47,37 @@ function sicCell(codes: readonly string[]): string {
   return lines.join("\n");
 }
 
-/** Column widths that fit the terminal, or undefined if it's narrow or unknown. */
-function companyColumnWidths(width: number | undefined, showSic: boolean): number[] | undefined {
-  if (!width || width < 80) return undefined;
-  const city = 14;
-  const county = 16;
-  const rating = 11;
-  const sic = showSic ? 11 : 0;
-  const columns = showSic ? 6 : 5;
-  const inner = width - 1 - GAP * (columns - 1) - city - county - rating - sic;
-  const routes = Math.floor(inner * 0.5);
-  const name = inner - routes;
-  return showSic ? [name, city, county, rating, sic, routes] : [name, city, county, rating, routes];
+function visibleWidth(cell: string): number {
+  return Math.max(0, ...cell.split("\n").map((l) => stripVTControlCharacters(l).length));
+}
+
+/**
+ * Column widths: each column as wide as its content. If that's wider than the
+ * terminal, places are capped and the rest is shared between the name and
+ * routes columns, which wrap.
+ */
+export function fitColumns(
+  natural: number[],
+  width: number | undefined,
+  flexible: readonly number[],
+): number[] {
+  const gaps = GAP * (natural.length - 1);
+  const total = natural.reduce((a, b) => a + b, 0) + gaps;
+  if (!width || total <= width - 1) return natural;
+  const widths = natural.map((w, i) => (flexible.includes(i) ? w : Math.min(w, 16)));
+  const fixed = widths.reduce((sum, w, i) => (flexible.includes(i) ? sum : sum + w), 0);
+  const room = Math.max(width - 1 - gaps - fixed, flexible.length * 12);
+  const want = flexible.reduce((sum, i) => sum + (natural[i] ?? 0), 0);
+  let left = room;
+  flexible.forEach((i, k) => {
+    const share =
+      k === flexible.length - 1
+        ? left
+        : Math.max(12, Math.floor((room * (natural[i] ?? 0)) / want));
+    widths[i] = Math.min(natural[i] ?? share, share);
+    left -= widths[i] ?? 0;
+  });
+  return widths;
 }
 
 /** Renders rows; adds a blank line between rows if any row wraps onto more lines. */
@@ -88,7 +107,6 @@ export function companiesTable(companies: Company[], options: TableOptions | num
   const opts: TableOptions = typeof options === "number" ? { width: options } : options;
   const s = paint(opts.color ?? false);
   const showSic = opts.showSic ?? false;
-  const colWidths = companyColumnWidths(opts.width, showSic);
   const header = [
     "Company",
     "Town/City",
@@ -97,13 +115,13 @@ export function companiesTable(companies: Company[], options: TableOptions | num
     ...(showSic ? ["SIC"] : []),
     "Routes",
   ];
-  const make = () =>
+  const make = (colWidths: number[]) =>
     new Table({
       head: header.map((h) => s.bold(h)),
       chars: NO_BORDERS,
       style: STYLE,
       wordWrap: true,
-      ...(colWidths ? { colWidths } : {}),
+      colWidths,
     });
 
   const rows = companies.map((company) => {
@@ -118,11 +136,16 @@ export function companiesTable(companies: Company[], options: TableOptions | num
     ];
   });
 
-  const table = make();
+  const natural = header.map((h, i) =>
+    Math.max(h.length, ...rows.map((row) => visibleWidth(row[i] ?? ""))),
+  );
+  const routesCol = header.length - 1;
+  const colWidths = fitColumns(natural, opts.width, [0, routesCol]);
+  const table = make(colWidths);
   for (const row of rows) table.push(row);
   // Work out how many lines each row takes, so rows can be spaced apart.
   const rowLines = rows.map((row) => {
-    const single = make();
+    const single = make(colWidths);
     single.push(row);
     return single.toString().split("\n").length - 1;
   });

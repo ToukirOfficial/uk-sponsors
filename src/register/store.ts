@@ -1,6 +1,7 @@
 import { readFile, rename, writeFile } from "node:fs/promises";
 import { UserError } from "../errors.js";
 import { normaliseName, normaliseText } from "./normalise.js";
+import type { CompanyInfo } from "../companies-house/match.js";
 import type { Rating, RegisterRow, SponsorType } from "./parse.js";
 
 export const FORMAT_VERSION = 2;
@@ -16,6 +17,8 @@ export interface Company {
   city: string;
   county: string;
   routes: RouteEntry[];
+  /** Set after "uk-sponsors enrich" if the company was matched; null if it wasn't. */
+  companiesHouse?: CompanyInfo | null;
 }
 
 export interface RegisterMeta {

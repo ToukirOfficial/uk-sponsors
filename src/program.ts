@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { Command, CommanderError, Option } from "commander";
 import { runCheck } from "./commands/check.js";
+import { runEnrich } from "./commands/enrich.js";
+import { INDUSTRIES } from "./companies-house/industries.js";
+import { paint } from "./output/style.js";
 import { runSearch, type SearchOptions } from "./commands/search.js";
 import { runStats } from "./commands/stats.js";
 import { runUpdate } from "./commands/update.js";
@@ -22,7 +25,17 @@ Data: Home Office "Register of licensed sponsors: workers", published on GOV.UK
 under the Open Government Licence v3.0.
 
 Disclaimer: being on the register means a company is licensed to sponsor visas.
-It doesn't mean the company is hiring, or will sponsor a particular role.`;
+It doesn't mean the company is hiring, or will sponsor a particular role.
+
+Industry data (optional, from "uk-sponsors enrich"): Companies House Free
+Company Data Product, under the Open Government Licence v3.0.`;
+
+const INDUSTRY_HELP = Object.entries(INDUSTRIES)
+  .map(
+    ([key, { label, codes }]) =>
+      `  ${key.padEnd(15)} ${label}: ${codes.map((c) => (c.length < 5 ? `${c}xxx` : c)).join(", ")}`,
+  )
+  .join("\n");
 
 function addOutputOptions(cmd: Command): Command {
   return cmd
@@ -79,6 +92,28 @@ Example:
       await runUpdate(ctx);
     });
 
+  program
+    .command("enrich")
+    .description(
+      "optional: download free Companies House data so you can search by industry (--industry, --sic)",
+    )
+    .addHelpText(
+      "after",
+      `
+Downloads Companies House's free "Basic Company Data" snapshot (about 470 MB,
+no account or key needed) and reads it as it arrives; the zip isn't saved.
+Each sponsor is matched by name and town, and its company number, status and
+SIC (industry) codes are saved next to your sponsor data. Takes a few minutes.
+Run "uk-sponsors update" first. Run enrich again whenever you like (monthly is plenty).
+
+Example:
+  $ uk-sponsors enrich
+  $ uk-sponsors search --city Leeds --route "Skilled Worker" --industry software`,
+    )
+    .action(async () => {
+      await runEnrich(ctx);
+    });
+
   addOutputOptions(
     program
       .command("search")
@@ -96,6 +131,18 @@ Example:
           "sponsor rating: A, B, or provisional (new UK Expansion Worker sponsors)",
         ),
       )
+      .option(
+        "--industry <preset>",
+        `industry preset (needs "enrich"): ${Object.keys(INDUSTRIES).join(", ")}`,
+      )
+      .option(
+        "--sic <codes>",
+        'SIC codes (needs "enrich"), e.g. 62012,62020 or 62xxx for every code starting 62',
+      )
+      .option(
+        "--include-inactive",
+        "with --industry/--sic: also show companies in liquidation, being struck off, etc.",
+      )
       .option("--limit <n>", "most results to show", "50"),
   )
     .addHelpText(
@@ -108,8 +155,17 @@ Examples:
   A-rated sponsors in Leeds, as a spreadsheet:
   $ uk-sponsors search --city Leeds --rating A --out leeds.csv
 
+  Software companies in Leeds that sponsor Skilled Worker visas (run "enrich" once first):
+  $ uk-sponsors search --city Leeds --route "Skilled Worker" --industry software
+
+  Any company with SIC code 62012 or 62020:
+  $ uk-sponsors search --sic 62012,62020
+
   Temporary Worker sponsors (e.g. Creative Worker, Seasonal Worker) as JSON:
-  $ uk-sponsors search --route "Temporary Worker" --limit 500 --json`,
+  $ uk-sponsors search --route "Temporary Worker" --limit 500 --json
+
+Industry presets (UK SIC 2007 codes; only "Active" companies unless --include-inactive):
+${INDUSTRY_HELP}`,
     )
     .action(async (options: SearchOptions) => {
       await runSearch(ctx, options);
@@ -168,14 +224,15 @@ export async function run(argv: string[], ctx: Context): Promise<number> {
     if (err instanceof CommanderError) {
       return err.exitCode === 0 ? 0 : 1;
     }
+    const s = paint(ctx.stderrColor ?? false);
     if (err instanceof UserError || err instanceof SourceError) {
-      ctx.stderr.write(`Error: ${err.message}\n`);
+      ctx.stderr.write(`${s.red(s.bold("Error:"))} ${err.message}\n`);
       if (err.hint) ctx.stderr.write(`${err.hint}\n`);
       return err.exitCode;
     }
     const message = err instanceof Error ? err.message : String(err);
     ctx.stderr.write(
-      `Error: something unexpected went wrong: ${message}\nPlease report it at ${ISSUES_URL}\n`,
+      `${s.red(s.bold("Error:"))} something unexpected went wrong: ${message}\nPlease report it at ${ISSUES_URL}\n`,
     );
     return 1;
   }

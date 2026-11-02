@@ -1,0 +1,10 @@
+CompanyName, CompanyNumber,RegAddress.CareOf,RegAddress.PostTown,CompanyStatus,SICCode.SicText_1,SICCode.SicText_2,SICCode.SicText_3,SICCode.SicText_4,URI, PreviousName_1.CompanyName, PreviousName_2.CompanyName
+ACME SOFTWARE LIMITED,01234567,,LEEDS,Active,62012 - Business and domestic software development,,,,http://business.data.gov.uk/id/company/01234567,,
+NORTHERN CARE AND HEALTH PLC,02345678,,WAKEFIELD,Active,86900 - Other human health activities,,,,,,
+OBRIEN & SONS LTD,03456789,,LEEDS,Liquidation,69102 - Solicitors,,,,,,
+ZURICH DATA LIMITED,04567890,,MANCHESTER,Active,62020 - Information technology consultancy activities,"63110 - Data processing, hosting and related activities",,,,,
+"THE ""QUOTED"" COMPANY LTD",05000001,,EDINBURGH,Active,62012 - Business and domestic software development,,,,,,
+THE QUOTED COMPANY LIMITED,05000002,,YORK,Active,62090 - Other information technology service activities,,,,,,
+NORDIC DESIGN UK LTD,06000001,,LONDON,Active,"62090 - Other information technology service activities",,,,,OLD NAME LTD,KØBENHAVN DESIGN APS
+CAFE SOCIETE LIMITED,07000001,,LONDON,Active - Proposal to Strike off,56101 - Licensed restaurants,,,,,,
+UNRELATED WIDGETS LTD,08000001,,LEEDS,Active,None Supplied,,,,,,
